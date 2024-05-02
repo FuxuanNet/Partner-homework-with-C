@@ -1,6 +1,13 @@
 # Prerequisites
 *.d
 
+# jupyter notebook
+.pyc
+
+# datasets
+.txt
+.png
+
 # Object files
 *.o
 *.ko
