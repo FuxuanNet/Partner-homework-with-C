@@ -118,5 +118,3 @@ if __name__ == '__main__':
     result=get_top_K(sorted_data,3) # 获取前五个最小距离的元组
     result=most_neibor(result) # 统计列表中出现频率最大的元素
     print(result) # 输出结果
-
-
