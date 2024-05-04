@@ -2,11 +2,12 @@
 *.d
 
 # jupyter notebook
-.pyc
+*.pyc
 
 # datasets
-.txt
-.png
+*.txt
+*.png
+*.zip
 
 # Object files
 *.o
