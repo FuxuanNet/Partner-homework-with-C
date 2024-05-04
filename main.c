@@ -114,52 +114,52 @@ int main(void)
 
     fillLabel(labels, NUM_SAMPLES * NUM_FILES_PER_SAMPLE);
 
-    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    // {
-    //     distance_data[i].distance = -1;
-    //     distance_data[i].label = '-';
-    //     sprintf(distance_data[i].file_path, "%s", "");
-    // }
+    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    {
+        distance_data[i].distance = -1;
+        distance_data[i].label = '-';
+        sprintf(distance_data[i].file_path, "%s", "");
+    }
 
-    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    // {
-    //     read_matrix_from_file(file_paths[i], vector[i]);
-    // }
+    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    {
+        read_matrix_from_file(file_paths[i], vector[i]);
+    }
 
-    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    // {
-    //     for (int j = 0; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
-    //     {
-    //         if (i != j)
-    //         {
-    //             distance_data[j].distance = calculate_distance(vector[i], vector[j]);
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    {
+        for (int j = 0; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
+        {
+            if (i != j)
+            {
+                distance_data[j].distance = calculate_distance(vector[i], vector[j]);
+            }
+        }
+    }
 
-    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    // {
-    //     int min_index = i;
-    //     for (int j = i + 1; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
-    //     {
-    //         if (distance_data[j].distance < distance_data[min_index].distance)
-    //         {
-    //             min_index = j;
-    //         }
-    //     }
+    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    {
+        int min_index = i;
+        for (int j = i + 1; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
+        {
+            if (distance_data[j].distance < distance_data[min_index].distance)
+            {
+                min_index = j;
+            }
+        }
 
-    //     if (min_index != i)
-    //     {
-    //         DistanceData temp = distance_data[i];
-    //         distance_data[i] = distance_data[min_index];
-    //         distance_data[min_index] = temp;
-    //     }
-    // }
+        if (min_index != i)
+        {
+            DistanceData temp = distance_data[i];
+            distance_data[i] = distance_data[min_index];
+            distance_data[min_index] = temp;
+        }
+    }
 
-    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    // {
-    //     printf("File Path: %s\n", distance_data[i].label);
-    // }
+    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    {
+        printf("File Path: %s\n", distance_data[i].label);
+    }
 
     return 0;
 }
