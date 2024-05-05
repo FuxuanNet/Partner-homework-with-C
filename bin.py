@@ -73,20 +73,20 @@ if __name__ == "__main__":
     # 设置图片宽高
     width = 32
     height = 32
-    # 遍历数据集中所有图片
-    for i in range(1, 63):
-        for j in range(1, 56):
-            # 读取图片
-            sam = '%03d' % i
-            img = '%03d' % j
-            file_in = f"Img\\Sample{sam}\\img{sam}-{img}.png"
-            #创建新文件夹并导入转化结果
-            if not os.path.exists(f"bin\\Sample{sam}"):
-                os.makedirs(f"bin\\Sample{sam}")
-            file_out_int = f"bin\\Sample{sam}\\img{sam}-{img}.txt"
-            handle_int(file_in, width, height, file_out_int)
+    # # 遍历数据集中所有图片
+    # for i in range(1, 63):
+    #     for j in range(1, 56):
+    #         # 读取图片
+    #         sam = '%03d' % i
+    #         img = '%03d' % j
+    #         file_in = f"Img\\Sample{sam}\\img{sam}-{img}.png"
+    #         #创建新文件夹并导入转化结果
+    #         if not os.path.exists(f"bin\\Sample{sam}"):
+    #             os.makedirs(f"bin\\Sample{sam}")
+    #         file_out_int = f"bin\\Sample{sam}\\img{sam}-{img}.txt"
+    #         handle_int(file_in, width, height, file_out_int)
 
         #导入判断图片并转化
-        file_in = "test\\image.png" #自定义上传图片路径
-        file_out_int = "test\\image.txt" #自定义保存 txt 文件路径
-        handle_int(file_in, width, height, file_out_int)
+    file_in = "D:\\vscode\\code\\C_TEST_1\\Partner-homework-with-C\\test\\image_7.png" #自定义上传图片路径 Partner-homework-with-C\test\image_2.png
+    file_out_int = "D:\\vscode\\code\\C_TEST_1\\Partner-homework-with-C\\test\\image_7.txt" #自定义保存 txt 文件路径
+    handle_int(file_in, width, height, file_out_int)
