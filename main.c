@@ -27,7 +27,7 @@ typedef struct
 /* 一个有label的距离结构体 */
 typedef struct
 {
-    float distance; // 距离
+    long double distance; // 距离
     int label; // 标签
 } Distance;
 
@@ -46,7 +46,7 @@ int hash(char label);
 char reverseHash(int index);
 
  // 计算两个手写数字结构体之间的距离
-float calDistance(Digit_Lerrte digit_Lerrte1, Digit_Lerrte digit_Lerrte2);
+long double calDistance(Digit_Lerrte digit_Lerrte1, Digit_Lerrte digit_Lerrte2);
 
 // 填充标签数组
 void fillLabel_pro(char array[], int size);
@@ -75,13 +75,13 @@ void knn_predict(int K);
 // 主函数
 int main(void)
 {
-    int K = 5;//设置 K值
+    int K = 3;//设置 K值
 
     /* 对已知数据进行测试，统计预测的正确率 */
-    // knn_classifiy(K);
+    knn_classifiy(K);
     // 对位置数据进行预测
 
-    knn_predict(K);
+    // knn_predict(K);
 
     return 0;
 }
@@ -131,12 +131,12 @@ char reverseHash(int index)
 }
 
 // 求两个图像之间的欧几里德距离。
-float calDistance(Digit_Lerrte Digit_Lerrte1, Digit_Lerrte Digit_Lerrte2)
+long double calDistance(Digit_Lerrte Digit_Lerrte1, Digit_Lerrte Digit_Lerrte2)
 {
-    float squareSum = 0.0;
+    long double squareSum = 0.0;
     for (int i = 0; i < 1024; i++)
     {
-        float diff = (float)Digit_Lerrte1.pixel[i] - (float)Digit_Lerrte2.pixel[i];
+        long double diff = (long double)Digit_Lerrte1.pixel[i] - (long double)Digit_Lerrte2.pixel[i];
 
         /*
         用浮点数计算更精确。
@@ -430,11 +430,11 @@ void knn_classifiy(int K)
 
     for (i = 0; i < (int)(sizeof(testCount) / sizeof(int)); i++)
     {
-        printf("%c:  (  %2d / %2d ) =  %.2f%%\n",
+        printf("%c:  (  %2d / %2d ) =  %.2lf%%\n",
                reverseHash(i),
                CorrectCount[i],
                testCount[i],
-               (float)(CorrectCount[i] * 1.0 / testCount[i] * 100));
+               (long double)(CorrectCount[i] * 1.0 / testCount[i] * 100));
     }
 }
 
@@ -492,7 +492,7 @@ void knn_predict(int K)
     Digit_Lerrte *Dpredict = (Digit_Lerrte *)malloc(number_predict * sizeof(Digit_Lerrte));
     char filePath_Predict[100];
     FILE *fp;
-    sprintf(filePath_Predict, "..\\test\\image019-001.txt");
+    sprintf(filePath_Predict, "..\\test\\image.txt");
     fp = fopen(filePath_Predict, "r");
     printf("..load predict digits.\n");
     for (i = 0; i < number_predict; i++)
