@@ -43,41 +43,41 @@ double calculate_distance(int vector1[1024], int vector2[1024])
     return sqrt(distance);
 }
 
-void fillLabel(char array[], int size)
-{
-    int index = 0;
-    char current_char;
+// void fillLabel(char array[], int size)
+// {
+//     int index = 0;
+//     char current_char;
 
-    for (current_char = '0'; current_char <= '9'; current_char++)
-    {
-        for (int i = 0; i < 55; i++)
-        {
-            array[index++] = current_char;
-            if (index >= size)
-                return;
-        }
-    }
+//     for (current_char = '0'; current_char <= '9'; current_char++)
+//     {
+//         for (int i = 0; i < 55; i++)
+//         {
+//             array[index++] = current_char;
+//             if (index >= size)
+//                 return;
+//         }
+//     }
 
-    for (current_char = 'A'; current_char <= 'Z'; current_char++)
-    {
-        for (int i = 0; i < 55; i++)
-        {
-            array[index++] = current_char;
-            if (index >= size)
-                return;
-        }
-    }
+//     for (current_char = 'A'; current_char <= 'Z'; current_char++)
+//     {
+//         for (int i = 0; i < 55; i++)
+//         {
+//             array[index++] = current_char;
+//             if (index >= size)
+//                 return;
+//         }
+//     }
 
-    for (current_char = 'a'; current_char <= 'z'; current_char++)
-    {
-        for (int i = 0; i < 55; i++)
-        {
-            array[index++] = current_char;
-            if (index >= size)
-                return;
-        }
-    }
-}
+//     for (current_char = 'a'; current_char <= 'z'; current_char++)
+//     {
+//         for (int i = 0; i < 55; i++)
+//         {
+//             array[index++] = current_char;
+//             if (index >= size)
+//                 return;
+//         }
+//     }
+// }
 
 void generate_file_paths(char file_paths[NUM_SAMPLES * NUM_FILES_PER_SAMPLE][FILE_PATH_LENGTH])
 {
@@ -95,71 +95,77 @@ void generate_file_paths(char file_paths[NUM_SAMPLES * NUM_FILES_PER_SAMPLE][FIL
     }
 }
 
-typedef struct
-{
-    char file_path[100];  //路径
-    char label;
-    double distance;
-} DistanceData;
+// typedef struct
+// {
+//     char file_path[100];  //路径
+//     char label;
+//     double distance;
+// } DistanceData;
 
 int main(void)
 {
     char file_paths[NUM_SAMPLES * NUM_FILES_PER_SAMPLE][FILE_PATH_LENGTH]; 
-    char labels[NUM_SAMPLES * NUM_FILES_PER_SAMPLE]; 
-    int vector[NUM_SAMPLES * NUM_FILES_PER_SAMPLE][1024]; 
+    // char labels[NUM_SAMPLES * NUM_FILES_PER_SAMPLE]; 
+    // int vector[NUM_SAMPLES * NUM_FILES_PER_SAMPLE][1024]; 
     
-    DistanceData distance_data[NUM_SAMPLES * NUM_FILES_PER_SAMPLE]; 
+    // DistanceData distance_data[NUM_SAMPLES * NUM_FILES_PER_SAMPLE]; 
 
     generate_file_paths(file_paths);
 
-    fillLabel(labels, NUM_SAMPLES * NUM_FILES_PER_SAMPLE);
-
     for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
     {
-        distance_data[i].distance = -1;
-        distance_data[i].label = '-';
-        sprintf(distance_data[i].file_path, "%s", "");
+        printf("%s\n", file_paths[i]);
     }
+    
 
-    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    {
-        read_matrix_from_file(file_paths[i], vector[i]);
-    }
+    // fillLabel(labels, NUM_SAMPLES * NUM_FILES_PER_SAMPLE);
 
-    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    {
-        for (int j = 0; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
-        {
-            if (i != j)
-            {
-                distance_data[j].distance = calculate_distance(vector[i], vector[j]);
-            }
-        }
-    }
+    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    // {
+    //     distance_data[i].distance = -1;
+    //     distance_data[i].label = '-';
+    //     sprintf(distance_data[i].file_path, "%s", "");
+    // }
 
-    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    {
-        int min_index = i;
-        for (int j = i + 1; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
-        {
-            if (distance_data[j].distance < distance_data[min_index].distance)
-            {
-                min_index = j;
-            }
-        }
+    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    // {
+    //     read_matrix_from_file(file_paths[i], vector[i]);
+    // }
 
-        if (min_index != i)
-        {
-            DistanceData temp = distance_data[i];
-            distance_data[i] = distance_data[min_index];
-            distance_data[min_index] = temp;
-        }
-    }
+    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    // {
+    //     for (int j = 0; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
+    //     {
+    //         if (i != j)
+    //         {
+    //             distance_data[j].distance = calculate_distance(vector[i], vector[j]);
+    //         }
+    //     }
+    // }
 
-    for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
-    {
-        printf("File Path: %s\n", distance_data[i].label);
-    }
+    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    // {
+    //     int min_index = i;
+    //     for (int j = i + 1; j < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; j++)
+    //     {
+    //         if (distance_data[j].distance < distance_data[min_index].distance)
+    //         {
+    //             min_index = j;
+    //         }
+    //     }
+
+    //     if (min_index != i)
+    //     {
+    //         DistanceData temp = distance_data[i];
+    //         distance_data[i] = distance_data[min_index];
+    //         distance_data[min_index] = temp;
+    //     }
+    // }
+
+    // for (int i = 0; i < NUM_SAMPLES * NUM_FILES_PER_SAMPLE; i++)
+    // {
+    //     printf("File Path: %s\n", distance_data[i].label);
+    // }
 
     return 0;
 }
