@@ -14,10 +14,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#define WIDTH 32//用于之后检测用户输入的是否是二值化后的文件
+#define HEIGHT 32
 #define MAX_LABELS_Kinds 62 // 包括 26 个小写字母，26个大写字母和 10 个数字
 
-/* 一个手写数字的结构体 */
+/* 一个手写数字和字母的结构体 */
 typedef struct
 {
     int pixel[1024]; // 像素数组，存储手写数字图像的像素值
@@ -27,17 +28,20 @@ typedef struct
 /* 一个有label的距离结构体 */
 typedef struct
 {
-    long double distance; // 距离
+    double distance; // 距离
     int label; // 标签
 } Distance;
 
 /* 每个数据集的个数 */
-int number = 3411; // 数据集的总数
+int number = 3410; // 数据集的总数
 int number_train = 2790; // 训练集数据数
-int number_test = 3411; // 测试集数据数
+int number_test = 620; // 测试集数据数(从总图片里抠出来的，本来应该是训练集的)
 int number_predict = 1; // 预测数据数
 
+
 /* 函数声明 */
+//用于判断用户输入的是否为二值化后的文件
+int isBinarized(FILE *file);
 
 // 哈希函数，将字符映射为索引
 int hash(char label);
@@ -46,13 +50,13 @@ int hash(char label);
 char reverseHash(int index);
 
  // 计算两个手写数字结构体之间的距离
-long double calDistance(Digit_Lerrte digit_Lerrte1, Digit_Lerrte digit_Lerrte2);
+double calDistance(Digit_Lerrte digit_Lerrte1, Digit_Lerrte digit_Lerrte2);
 
 // 填充标签数组
 void fillLabel_pro(char array[], int size);
 
 // 从文件加载手写数字数据
-int loadDigit(Digit_Lerrte *digit_Lerrte, FILE *fp, int *labels, char temp_char);
+int load_data(Digit_Lerrte *digit_Lerrte, FILE *fp, int *labels, char temp_char);
 
 // 显示一个手写数字结构体
 void showDigit(Digit_Lerrte digit_Lerrte);
@@ -78,15 +82,32 @@ int main(void)
     int K = 3;//设置 K值
 
     /* 对已知数据进行测试，统计预测的正确率 */
-    knn_classifiy(K);
+    //   knn_classifiy(K);
     // 对位置数据进行预测
 
-    // knn_predict(K);
+    knn_predict(K);
 
     return 0;
 }
 
 // Digit_Lerrte1 Digit_Lerrte2
+
+// 检查图像是否已经二值化的函数
+int isBinarized(FILE *file) {
+
+    int image[WIDTH * HEIGHT];
+    for (int i = 0; i < WIDTH * HEIGHT; i++) {
+        if (fscanf(file, "%1d", &image[i]) != 1  ) {//检测是否能成功读取//%1d确保一次只读取一个数字！
+            return 0;
+        }
+    }
+    for (int i = 0; i < WIDTH * HEIGHT; i++) {
+        if (image[i] != 0 && image[i] != 1) {//检测是否只有0和1
+            return 0; // 非二值化图像
+        }
+    }
+    return 1; // 二值化图像
+}
 
 // 哈希函数：根据传入的标签字符，将其映射为一个索引值
 int hash(char label)
@@ -131,19 +152,19 @@ char reverseHash(int index)
 }
 
 // 求两个图像之间的欧几里德距离。
-long double calDistance(Digit_Lerrte Digit_Lerrte1, Digit_Lerrte Digit_Lerrte2)
+double calDistance(Digit_Lerrte Digit_Lerrte1, Digit_Lerrte Digit_Lerrte2)
 {
-    long double squareSum = 0.0;
+    double squareSum = 0.0;
     for (int i = 0; i < 1024; i++)
     {
-        long double diff = (long double)Digit_Lerrte1.pixel[i] - (long double)Digit_Lerrte2.pixel[i];
+        double diff = (double)Digit_Lerrte1.pixel[i] - (double)Digit_Lerrte2.pixel[i];
 
         /*
         用浮点数计算更精确。
         之前用int时把1预测成了H，就离谱。修改之后就正确了。
         */
         
-        squareSum += diff * diff; // 这样比使用 pow 函数更高效
+        squareSum += diff * diff; // 这样比使用 pow 函数更高效（之前用的pow）
     }
     return sqrtf(squareSum);
 }
@@ -156,10 +177,10 @@ void fillLabel_pro(char array[], int size)
 
     for (current_char = '0'; current_char <= '9'; current_char++)
     {
-        for (int i = 0; i < 55; i++)
+        for (int i = 0; i < 55; i++)//因为每个文件夹（每个文件夹都是同一种标签的图片）有55张图片（准确来说应该是二值化后的txt文件）
         {
-            array[index++] = current_char;
-            if (index >= size)
+            array[index++] = current_char;//贴标签
+            if (index >= size)//这步感觉有些问题，先搁着，等会再看看
                 return;
         }
     }
@@ -187,19 +208,19 @@ void fillLabel_pro(char array[], int size)
 }
 
 // 从文件中读取数字图像，并进行哈希处理。
-int loadDigit(Digit_Lerrte *digit_Lerrte, FILE *fp, int *labels, char temp_char)
+int load_data(Digit_Lerrte *digit_Lerrte, FILE *fp, int *labels, char temp_char)//这里的temp_char就是标签
 {
     int index = 0;
     for (index = 0; index < 1024; index++)
     {
-        if (!fscanf(fp, "%d", &(digit_Lerrte->pixel[index])))
-        {
-            printf("FILE already read finish.\n");
+        if (!fscanf(fp, "%d", &(digit_Lerrte->pixel[index])))//读入数据
+        {//进行错误处理，感觉没必要
+            printf("error\n");
             return -1;
         }
     }
 
-    digit_Lerrte->label = hash(temp_char);
+    digit_Lerrte->label = hash(temp_char);//读入用哈希转化为int的标签
     *labels = digit_Lerrte->label;
 
     return 1;
@@ -213,11 +234,12 @@ void showDigit(Digit_Lerrte digit_Lerrte)
     {
         for (j = 0; j < 32; j++)
         {
-            printf("%d", digit_Lerrte.pixel[i * 32 + j]);
+            printf("%d", digit_Lerrte.pixel[i * 32 + j]);//打印行
         }
-        printf("\n");
+        printf("\n");//换行，打印下一列
     }
-    printf(" %d \n", digit_Lerrte.label);
+    char temp_lable = reverseHash(digit_Lerrte.label);//用反哈希转化为char
+    printf(" %c \n", temp_lable);//打印标签
 }
 
 // 交换数组中的两个项, 便于排序
@@ -230,7 +252,7 @@ void exchange(Distance *in, int index1, int index2)
 */
 
 {
-    Distance tmp = (Distance)in[index1]; // 这里应该可以删掉(Distance)，因为 in已经是 Distance 类型
+    Distance tmp = in[index1];
     in[index1] = in[index2];
     in[index2] = tmp;
 }
@@ -242,11 +264,11 @@ void selectSort(Distance *in, int length)
     int N = length;
     for (i = 0; i < N - 1; i++)
     {
-        min = i;
+        min = i;//每次外循环开始时，都将当前未排序部分的第一个元素视为最小的
         for (j = i + 1; j < N; j++)
         {
             if (in[j].distance < in[min].distance)
-                min = j;
+                min = j;//在内循环中逐个比较，找到最小值后进行交换操作
         }
         exchange(in, i, min);
     }
@@ -287,6 +309,7 @@ int prediction(int K, Digit_Lerrte in, Digit_Lerrte *train, int nt)  // 注意�
     }
 
 /*
+    之前检查错误用于调试的代码:D
     for(int i = 0; i < MAX_LABELS_Kinds; i++) {
         printf("%d:%d ", i, labelCounts[i]);
     }
@@ -307,7 +330,7 @@ int prediction(int K, Digit_Lerrte in, Digit_Lerrte *train, int nt)  // 注意�
 
     free(distances); // 释放动态分配的内存
 
-    // 根据前面定义的 hash 函数返回实际的标签
+    // 返回int 类型的标签，最后在knn_predict函数中转化为char了
     return mostFrequentLabel;
 }
 
@@ -317,20 +340,16 @@ void knn_classifiy(int K)
     char arrayLables[3411]; // 用于存储标签数据的数组
 
     fillLabel_pro(arrayLables, number); // 贴标签
-    printf(".knn_classifiy.\n");
+    printf("Run the knn_classify function.\n");
 
     int i;
 
-    // FILE *fp;
-
     /* 读入训练数据 */
-    int trainLabels[number];
-    int trainCount[62] = {0};
-    Digit_Lerrte *Dtrain = (Digit_Lerrte *)malloc(number * sizeof(Digit_Lerrte)); // 分配内存空间存储训练数据
+    int trainLabels[number_train];
+    int trainCount[62] = {0};//trainCount用来统计每种标签的数量
+    Digit_Lerrte *Dtrain = (Digit_Lerrte *)malloc(number_train * sizeof(Digit_Lerrte)); // 分配内存空间存储训练数据
 
-    // char folderPath[100]; // 存储文件夹路径的字符串
-
-    printf("..load training digits.\n");
+    printf("Loading training data ...\n");
     for (int i = 0; i <= 61; i++)
     {
         // 遍历文件夹中的每个文本文件，假设每个文件夹下有 55 个文件
@@ -352,7 +371,7 @@ void knn_classifiy(int K)
             }
 
             // 加载当前文件中的数字数据并更新 trainCount 数组
-            if (loadDigit(&Dtrain[i * 55 + j - 1], fp, &trainLabels[i * 55 + j - 1], arrayLables[i * 55 + j - 1]) == -1)
+            if (load_data(&Dtrain[i * 45 + j - 1], fp, &trainLabels[i * 45 + j - 1], arrayLables[i * 55 + j - 1]) == -1)
             {
                 // 处理加载失败情况
                 fprintf(stderr, "Failed to load data from file: %s\n", filePath_test);
@@ -362,7 +381,7 @@ void knn_classifiy(int K)
             fclose(fp);
         }
     }
-    printf("..Done.\n");
+    printf("Training data loaded.\n");
 
     /*读入测试数据*/
     int testLabels[number_test];
@@ -371,7 +390,7 @@ void knn_classifiy(int K)
 
     // char folderPath_test[100]; // 存储文件夹路径的字符串
 
-    printf("..load testing digits.\n");
+    printf("Loading test data ...\n");
     for (int i = 0; i <= 61; i++)
     {
         // 遍历文件夹中的每个文本文件，假设每个文件夹下有 55 个文件
@@ -393,8 +412,8 @@ void knn_classifiy(int K)
             }
 
             // 加载当前文件中的数字数据并更新 trainCount 数组
-            if (loadDigit(&Dtest[i * 55 + j - 1], fp, &testLabels[i * 55 + j - 1], arrayLables[i * 55 + j - 1]) == -1)
-            {
+            if (load_data(&Dtest[i * 10 + j -45 - 1], fp, &testLabels[i * 10 + j -45 - 1], arrayLables[i * 55 + j - 1]) == -1)
+            {//这里注意i * 10 + j -45 - 1，0的准确率异常的bug终于找到了（喜）
                 // 处理加载失败情况
                 fprintf(stderr, "Failed to load data from file: %s\n", filePath_test);
                 exit(EXIT_FAILURE);
@@ -403,10 +422,10 @@ void knn_classifiy(int K)
             fclose(fp);
         }
     }
-    printf("..Done.\n"); // 这里 testCount 最后一个是 0，稍后修改
+    printf("Test data loaded.\n"); // 这里 testCount 最后一个是 0，稍后修改
 
     /* 求测试数据与训练数据之间的距离 */
-    printf("..Cal Distance begin.\n");
+    printf("Predicting ...\n");
 
     // Distance Distance2Train[number ];
 
@@ -414,9 +433,9 @@ void knn_classifiy(int K)
     int itest, predict;
     for (itest = 0; itest < number_test; itest++)
     {
-        predict = prediction(K, Dtest[itest], Dtrain, number);
+        predict = prediction(K, Dtest[itest], Dtrain, number_train);//调用prediction函数
 
-        // printf("%d-%d\n",predict, Dtest[itest].label);
+        // printf("%d-%d\n",predict, Dtest[itest].label);//用于调试的语句
 
         /* 给预测准确的进行计数 */
         if (predict == Dtest[itest].label)
@@ -424,18 +443,21 @@ void knn_classifiy(int K)
             CorrectCount[predict]++;  // 预测正确，增加计数
         }
     }
-
+    printf("Prediction completed.\n");
     /* 输出测试数据的准确率 */
-    printf("    Correct radio:   \n\n");
+    printf("Accuracy :\n");
 
     for (i = 0; i < (int)(sizeof(testCount) / sizeof(int)); i++)
     {
-        printf("%c:  (  %2d / %2d ) =  %.2lf%%\n",
-               reverseHash(i),
+        printf("%c: ( %2d / %2d ) =  %.2lf%%\n",
+               reverseHash(i),//将int标签转化为char标签
                CorrectCount[i],
                testCount[i],
-               (long double)(CorrectCount[i] * 1.0 / testCount[i] * 100));
+               (double)(CorrectCount[i] * 1.0 / testCount[i] * 100));
     }
+    free(Dtrain);
+    free(Dtest);
+
 }
 
 // 用训练数据集进行预测
@@ -444,8 +466,9 @@ void knn_predict(int K)
 {
     char arrayLables[3411];
     fillLabel_pro(arrayLables, number); // 贴标签
-    printf(".knn_predict.\n");
+    printf("Run the knn_predict function.\n");
     /* 读入训练数据 */
+    //以下和上面的函数相同
     int i;
     int trainLabels[number];
     int trainCount[62] = {0};
@@ -453,11 +476,11 @@ void knn_predict(int K)
 
     // char folderPath[100]; // 存储文件夹路径的字符串
 
-    printf("..load training digits.\n");
+    printf("Loading training data ...\n");
     for (int i = 0; i <= 61; i++)
     {
         // 遍历文件夹中的每个文本文件，假设每个文件夹下有 55 个文件
-        for (int j = 1; j <= 45; j++)
+        for (int j = 1; j <= 55; j++)
         {                            
             char filePath_test[100]; // 存储当前文件的路径的字符串
             FILE *fp;
@@ -474,7 +497,7 @@ void knn_predict(int K)
                 exit(EXIT_FAILURE);
             }
             // 加载当前文件中的数字数据并更新 trainCount 数组
-            if (loadDigit(&Dtrain[i * 55 + j - 1], fp, &trainLabels[i * 55 + j - 1], arrayLables[i * 55 + j - 1]) == -1)
+            if (load_data(&Dtrain[i * 55 + j - 1], fp, &trainLabels[i * 55 + j - 1], arrayLables[i * 55 + j - 1]) == -1)
             {
                 // 处理加载失败情况
                 fprintf(stderr, "Failed to load data from file: %s\n", filePath_test);
@@ -484,35 +507,67 @@ void knn_predict(int K)
             fclose(fp);
         }
     }
-    printf("..Done.\n");
+    printf("Training data loaded.\n");
 
     /* 读入需要预测的数据 */
+    
     int predictLabels[number_predict];
     int predictCount[62] = {0};
     Digit_Lerrte *Dpredict = (Digit_Lerrte *)malloc(number_predict * sizeof(Digit_Lerrte));
     char filePath_Predict[100];
     FILE *fp;
-    sprintf(filePath_Predict, "..\\test\\image.txt");
+    char path[1024];
+    printf("Please enter the absolute file path (binary txt 32*32) ...\n");
+    scanf("%1024s",path);
+    sprintf(filePath_Predict, path);// 构建当前文件的路径
     fp = fopen(filePath_Predict, "r");
-    printf("..load predict digits.\n");
+    int COUNT = 0;//当循环五次就停止，安全
+    while(!isBinarized(fp) && COUNT < 5){//判断用户输入是否正确
+        printf("File don't exist or The image has not been binarized!\n");
+        scanf("%1024s",path);
+        sprintf(filePath_Predict, path);
+        fp = fopen(filePath_Predict, "r");
+        COUNT++;
+    }
+
+    printf("Loading input data ...\n");
     for (i = 0; i < number_predict; i++)
     {
-        loadDigit(&Dpredict[i], fp, &predictLabels[i], arrayLables[i]);
+        load_data(&Dpredict[i], fp, &predictLabels[i], arrayLables[i]);
         predictCount[i]++;
     }
     fclose(fp);
-    printf("..Done.\n");
+    printf("Input data loaded.\n");
 
     /* 求输入数据与训练数据之间的距离 */
-    printf("..Cal Distance begin.\n");
+    printf("Predicting ...\n");
 
-    // Distance Distance2Train[number ];
+    //这个也是调试时的代码 Distance Distance2Train[number ];
 
     int ipredict, predict;
     for (ipredict = 0; ipredict < number_predict; ipredict++)
     {
         predict = prediction(K, Dpredict[ipredict], Dtrain, number);
-        char char_predict = reverseHash(predict);
-        printf("result:%c\n", char_predict);
+        char char_predict = reverseHash(predict);//转化为char类型标签
+        printf("Result:%c\n", char_predict);
     }
+    fclose(fp);
+    free(Dtrain);
+    free(Dpredict);
 }
+/*
+在控制台打印中文就会乱码，实测如下，笑死，老老实实改成英文吧
+杩愯knn_classifiy鍑芥暟
+鍔犺浇璁粌鏁版嵁涓?..
+璁粌鏁版嵁鍔犺浇瀹屾垚
+鍔犺浇娴嬭瘯鏁版嵁涓?..
+娴嬭瘯鏁版嵁鍔犺浇瀹屾垚
+棰勬祴涓?..
+*/
+/*
+理论上用第二个函数预测的准确率要比第一个函数算出来的准确率高（虽然还是依托），
+因为对于每种标签第一个函数训练了number_train = 2790张图片（其中有number_test = 620张图片被拿去算准确率了），
+而第二个函数训练了number = 3410张图片
+*/
+
+
